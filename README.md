@@ -1,2 +1,12 @@
 # primal_inviter
-Bot for primal invites
+Bot for Primal
+
+Почты поместить в файл mails.txt в формате mail:password
+
+В файл .env поместить свою рефку. Если у вас НЕ rambler почты, там же необходимо поменять pop3 сервер (гугли свой).
+
+При использовании обычных прокси поместить их в файл proxy.txt построчно, в формате user:pass@ip:port
+
+При использовании мобильных поместить прокси и ссылку для смены в файл .env
+
+Для старта с обычными прокси команда: python start_proxy.py , для старта с мобильными: python start_mobile_proxy.py
