@@ -1,3 +1,4 @@
+from modules.anticaptchacom import abuzHCaptchaProxyless
 from user_agent import generate_user_agent
 from time import time, sleep
 from loguru import logger
@@ -15,11 +16,16 @@ import string
 ENV = dotenv_values('.env')
 REFERRAL_CODE = ENV['REFERRAL_CODE']
 POP3_SERVER = ENV['POP3_SERVER']
+ANTICAPTCHA_KEY = ENV['ANTICAPTCHA_KEY']
+
 file_mails = 'files/mails.txt'
 file_proxy = 'files/proxy.txt'
 file_registered = 'files/registered.txt'
 file_blacklist = 'files/blacklist.txt'
 file_log = 'files/log.log'
+
+website_url = 'https://byrjycocvluocdgliyvg.supabase.co'
+site_key = 'c4344dc0-0182-431f-903c-d8f53065d81d'
 
 # LOGGING SETTING
 logger.remove()
@@ -79,11 +85,23 @@ def register(mail, password):
 
         session = setup_session(mail, proxy)
 
+        captcha = abuzHCaptchaProxyless(ANTICAPTCHA_KEY, website_url, site_key, verbose=False)
+        logger.info(f"Solving captcha: {mail}")
+        while True:
+            captcha_token, captcha_error = captcha.get_token_solution()
+            if (captcha_error == 1):
+                logger.error(f'Captcha error, solving again: {mail} | Code error: {captcha_token}')
+            else:
+                logger.success(f'Captcha solved: {mail}')
+                break
+
         payload_otp = {
                 "email": mail,
                 "data": {},
                 "create_user": True,
-                "gotrue_meta_security": {}
+                "gotrue_meta_security": {
+                    'captcha_token': captcha_token,
+                    },
                 }
         try:
             resp_otp = session.post('https://byrjycocvluocdgliyvg.supabase.co/auth/v1/otp', json=payload_otp)
@@ -227,9 +245,9 @@ if (__name__ == '__main__'):
         blacklist = [row.strip().split(':')[:2] for row in file]
 
     mails = [x for x in all_mails if (x not in registered and x not in blacklist)]
-    
+
     logger.info("Подпишись t.me/cryptogovnozavod!")
-    with concurrent.futures.ThreadPoolExecutor(15) as executor:
+    with concurrent.futures.ThreadPoolExecutor(5) as executor:
         futures = []
         for mail in mails:
             futures.append(
