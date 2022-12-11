@@ -3,3 +3,4 @@ loguru==0.6.0
 python-dotenv==0.21.0
 requests==2.28.1
 user_agent==0.1.10
+anticaptchaofficial==1.0.34
